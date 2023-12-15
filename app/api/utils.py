@@ -146,7 +146,7 @@ async def invest_it(
             # Если сумма инвестиций для проекта меньше
             # доступной суммы финансирования
             if project_to_invest <= to_be_invested:
-                # Увеличиваем в проекте сумму 
+                # Увеличиваем в проекте сумму
                 # "invested_amount" = "full_amount"
                 setattr(project, "invested_amount", project.full_amount)
                 setattr(project, "close_date", get_current_time())
