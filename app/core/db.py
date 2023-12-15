@@ -11,7 +11,7 @@ class PreBase:
 
     @declared_attr
     def __tablename__(cls):
-        # Именем таблицы будет название модели в нижнем регистре.
+        # Именем таблицы будет название модели в нижнем регистре
         return cls.__name__.lower()
 
 
@@ -21,7 +21,9 @@ engine = create_async_engine(settings.database_url)
 
 async_session = AsyncSession(engine, expire_on_commit=False)
 
-AsyncSessionLocal = sessionmaker(engine, expire_on_commit=False, class_=AsyncSession)
+AsyncSessionLocal = sessionmaker(
+    engine, expire_on_commit=False, class_=AsyncSession
+)
 
 
 # Асинхронный генератор сессий.

@@ -37,7 +37,8 @@ class CRUDProject(CRUDBase):
     ) -> list[list]:
         """Выборка закрытых проектов."""
         project_objs = await session.execute(
-            select(CharityProject).where(CharityProject.close_date.isnot(None))
+            select(CharityProject).where(CharityProject
+                                         .close_date.isnot(None))
         )
         project_objs = project_objs.scalars().all()
 

@@ -1,14 +1,20 @@
 from fastapi import APIRouter, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.api.utils import (check_project_before_delete,
-                           check_project_before_update,
-                           check_project_name_before_create_update, invest_it)
+from app.api.utils import (
+    check_project_before_delete,
+    check_project_before_update,
+    check_project_name_before_create_update,
+    invest_it,
+)
 from app.core.db import get_async_session
 from app.core.user import current_superuser
 from app.crud.charity_projects import crud_charity_projects
-from app.schemas.charity_projects import (ProjectCreate, ProjectDB,
-                                          ProjectUpdate)
+from app.schemas.charity_projects import (
+    ProjectCreate,
+    ProjectDB,
+    ProjectUpdate,
+)
 
 router = APIRouter(
     tags=["Charity Project"],
@@ -18,15 +24,17 @@ router = APIRouter(
 @router.post(
     "/",
     response_model=ProjectDB,
-    response_model_exclude_none=True,
-    dependencies=[Depends(current_superuser)],
+    response_model_exclude_defaults=True,
+    dependencies=(Depends(current_superuser),),
 )
 async def create_project(
     project: ProjectCreate,
     session: AsyncSession = Depends(get_async_session),
 ):
     """Создание нового проекта - только для суперюзеров."""
-    await check_project_name_before_create_update(name=project.name, session=session)
+    await check_project_name_before_create_update(
+        name=project.name, session=session
+    )
     new_project = await crud_charity_projects.create(project, session)
     await invest_it(session)
     await session.refresh(new_project)
@@ -47,7 +55,9 @@ async def get_all_projects(
 
 
 @router.patch(
-    "/{project_id}", response_model=ProjectDB, dependencies=[Depends(current_superuser)]
+    "/{project_id}",
+    response_model=ProjectDB,
+    dependencies=(Depends(current_superuser),),
 )
 async def update_project(
     project_id: int,
@@ -64,7 +74,7 @@ async def update_project(
 @router.delete(
     "/{project_id}",
     response_model=ProjectDB,
-    dependencies=[Depends(current_superuser)],
+    dependencies=(Depends(current_superuser),),
 )
 async def remove_project(
     project_id: int,

@@ -24,7 +24,9 @@ class CRUDBase:
 
         return db_obj.scalars().first()
 
-    async def get_multi(self, session: AsyncSession, user: Optional[User] = None):
+    async def get_multi(
+        self, session: AsyncSession, user: Optional[User] = None
+    ):
         """Получение списка всех объектов."""
         request_text = select(self.model)
 
@@ -34,7 +36,9 @@ class CRUDBase:
         db_objs = await session.execute(request_text)
         return db_objs.scalars().all()
 
-    async def create(self, obj_in, session: AsyncSession, user: Optional[User] = None):
+    async def create(
+        self, obj_in, session: AsyncSession, user: Optional[User] = None
+    ):
         """Создание объекта."""
         obj_in_data = obj_in.dict()
 

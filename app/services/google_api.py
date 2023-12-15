@@ -32,7 +32,9 @@ async def spreadsheets_create(wrapper_services: Aiogoogle) -> str:
     return spreadsheetid
 
 
-async def set_user_permissions(spreadsheetid: str, wrapper_services: Aiogoogle) -> None:
+async def set_user_permissions(
+    spreadsheetid: str, wrapper_services: Aiogoogle
+) -> None:
     permissions_body = {
         "type": "user",
         "role": "writer",
@@ -59,7 +61,12 @@ async def spreadsheets_update_value(
     ]
     # Список значений для строк таблицы
     for project in project_list:
-        new_row = [str(project[0]), str(project[2]), str(project[3]), str(project[4])]
+        new_row = [
+            str(project[0]),
+            str(project[2]),
+            str(project[3]),
+            str(project[4]),
+        ]
         table_values.append(new_row)
     print(table_values)
 

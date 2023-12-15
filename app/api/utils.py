@@ -19,7 +19,7 @@ async def check_project_name_before_create_update(
     name: str,
     session: AsyncSession,
 ):
-    """Проверка имени проекта на уникальвность."""
+    """Проверка имени проекта на уникальность."""
     db_obj = await crud.crud_charity_projects.get_project_by_name(
         name=name, session=session
     )
@@ -38,7 +38,8 @@ async def check_project_id(
     project = await crud.crud_charity_projects.get(project_id, session)
     if project is None:
         raise HTTPException(
-            status_code=HTTPStatus.NOT_FOUND, detail=f"Проект {project_id} не найден!"
+            status_code=HTTPStatus.NOT_FOUND,
+            detail=f"Проект {project_id} не найден!",
         )
     return project
 
@@ -60,12 +61,15 @@ async def check_project_before_update(
         )
     # Проверка, что название проекта остается уникальным
     if obj_in.name is not None and obj_in.name != project.name:
-        await check_project_name_before_create_update(name=obj_in.name, session=session)
+        await check_project_name_before_create_update(
+            name=obj_in.name, session=session
+        )
     # Проверка, что новая сумма проекта не меньше зачисленных средств
     if obj_in.full_amount and project.invested_amount > obj_in.full_amount:
         raise HTTPException(
             status_code=HTTPStatus.BAD_REQUEST,
-            detail=f"Новая сумма проекта {obj_in.full_amount} не может быть меньше внесенной - {project.invested_amount}!",
+            detail=(f"Новая сумма проекта {obj_in.full_amount} не может быть"
+                    " меньше внесенной - {project.invested_amount}!",)
         )
 
 
@@ -103,7 +107,8 @@ async def invest_it(
     )
     project_sum = project_sum.fetchall()
     project_full = 0 if project_sum[0][0] is None else project_sum[0][0]
-    project_invested = 0 if project_sum[0][1] is None else project_sum[0][1]
+    project_invested = (0 if project_sum[0][1] is None
+                        else project_sum[0][1])
 
     # Вычисление суммы необходимого финансирования
     to_invest = project_full - project_invested
@@ -125,7 +130,8 @@ async def invest_it(
     )
     donation_sum = donation_sum.fetchall()
     donation_full = 0 if donation_sum[0][0] is None else donation_sum[0][0]
-    donation_invested = 0 if donation_sum[0][1] is None else donation_sum[0][1]
+    donation_invested = (0 if donation_sum[0][1] is None
+                         else donation_sum[0][1])
 
     # Вычисление суммы доступного финансирования
     to_be_invested = donation_full - donation_invested
@@ -137,9 +143,11 @@ async def invest_it(
         if to_be_invested > 0 and to_invest > 0:
             # Вычисление необходимого финансирования на проект
             project_to_invest = project.full_amount - project.invested_amount
-            # Если сумма инвестиций для проекта меньше доступной суммы финансирования
+            # Если сумма инвестиций для проекта меньше
+            # доступной суммы финансирования
             if project_to_invest <= to_be_invested:
-                # Увеличиваем в проекте сумму "invested_amount" = "full_amount"
+                # Увеличиваем в проекте сумму 
+                # "invested_amount" = "full_amount"
                 setattr(project, "invested_amount", project.full_amount)
                 setattr(project, "close_date", get_current_time())
                 setattr(project, "fully_invested", True)
@@ -148,12 +156,15 @@ async def invest_it(
                 # Уменьшаем сумму доступного финансирования
                 to_be_invested = to_be_invested - project_to_invest
                 session.add(project)
-            # Если сумма инвестиций для проекта больше доступной суммы финансирования
+            # Если сумма инвестиций для проекта больше
+            # доступной суммы финансирования
             else:
-                # Увеличиваем баланс полученного финансирования на всю оставшуюся
-                # сумму пожертвований
+                # Увеличиваем баланс полученного финансирования на всю
+                # оставшуюся сумму пожертвований
                 setattr(
-                    project, "invested_amount", project.invested_amount + to_be_invested
+                    project,
+                    "invested_amount",
+                    project.invested_amount + to_be_invested,
                 )
                 session.add(project)
                 # И прекращаем распределение пожертвований по проектам
@@ -166,16 +177,20 @@ async def invest_it(
     to_be_invested = donation_full - donation_invested
     # и сумму потребности в инвестировании
     to_invest = project_full - project_invested
-    # Определяем на какую величину будет уменьшена сумма доступных пожертвований
+    # Определяем на какую величину будет уменьшена
+    # сумма доступных пожертвований
     to_be_invested = min(to_be_invested, to_invest)
 
     # Обработка списка пожертвований
     for donation in donation_objs:
         # Вычисление доступную сумму пожертвования
-        donation_to_be_invested = donation.full_amount - donation.invested_amount
+        donation_to_be_invested = (
+            donation.full_amount - donation.invested_amount
+        )
         # Если сумма пожертвования меньше доступной суммы пожертвований
         if donation_to_be_invested <= to_be_invested:
-            # Увеличиваем в пожертвовании сумму "invested_amount" = "full_amount"
+            # Увеличиваем в пожертвовании сумму
+            # "invested_amount" = "full_amount"
             setattr(donation, "invested_amount", donation.full_amount)
             setattr(donation, "close_date", get_current_time())
             setattr(donation, "fully_invested", True)
@@ -186,7 +201,9 @@ async def invest_it(
 
         else:
             setattr(
-                donation, "invested_amount", donation.invested_amount + to_be_invested
+                donation,
+                "invested_amount",
+                donation.invested_amount + to_be_invested,
             )
             session.add(donation)
             break

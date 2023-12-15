@@ -6,8 +6,11 @@ from app.core.db import get_async_session
 from app.core.user import current_superuser, current_user
 from app.crud.donations import crud_donations
 from app.models import User
-from app.schemas.donations import (DonationCreate, DonationFulltDB,
-                                   DonationShortDB)
+from app.schemas.donations import (
+    DonationCreate,
+    DonationFulltDB,
+    DonationShortDB,
+)
 
 router = APIRouter(
     tags=["Donations"],
@@ -18,7 +21,7 @@ router = APIRouter(
     "/",
     response_model=DonationShortDB,
     response_model_exclude_none=True,
-    dependencies=[Depends(current_user)],
+    dependencies=(Depends(current_user),),
 )
 async def create_donation(
     donation: DonationCreate,
@@ -37,9 +40,11 @@ async def create_donation(
     "/",
     response_model=list[DonationFulltDB],
     response_model_exclude_none=True,
-    dependencies=[Depends(current_superuser)],
+    dependencies=(Depends(current_superuser),),
 )
-async def get_all_donations(session: AsyncSession = Depends(get_async_session)):
+async def get_all_donations(
+    session: AsyncSession = Depends(get_async_session),
+):
     """Список всех пожертвований всех пользователей."""
     donations = await crud_donations.get_multi(session)
     return donations
@@ -49,7 +54,7 @@ async def get_all_donations(session: AsyncSession = Depends(get_async_session)):
     "/my",
     response_model=list[DonationShortDB],
     response_model_exclude_none=True,
-    dependencies=[Depends(current_user)],
+    dependencies=(Depends(current_user),),
 )
 async def get_user_donations(
     user: User = Depends(current_user),
